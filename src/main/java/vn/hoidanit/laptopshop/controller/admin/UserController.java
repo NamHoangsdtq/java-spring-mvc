@@ -1,18 +1,21 @@
 package vn.hoidanit.laptopshop.controller.admin;
 
 import java.util.List;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.Valid;
 import vn.hoidanit.laptopshop.domain.User;
-
+import vn.hoidanit.laptopshop.service.UploadService;
 import vn.hoidanit.laptopshop.service.UserService;
-
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -20,9 +23,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class UserController {
 
     private final UserService userService;
+    private final UploadService uploadService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService) {
+    public UserController(
+            UploadService uploadService,
+            UserService userService, PasswordEncoder passwordEncoder) {
+        this.uploadService = uploadService;
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
 
     }
 
@@ -53,16 +62,34 @@ public class UserController {
         return "admin/user/detail";
     }
 
-    @RequestMapping("/admin/user/create") // get
+    @GetMapping("/admin/user/create") // get
     public String getCreateUserPage(Model model) {
 
         model.addAttribute("newUser", new User());
         return "admin/user/create";
     }
 
-    @RequestMapping(value = "/admin/user/create", method = RequestMethod.POST)
-    public String CreateUserPage(Model model, @ModelAttribute("newUser") User hoidanit) {
-        System.out.println("run here" + hoidanit);
+    @PostMapping("/admin/user/create")
+    public String CreateUserPage(Model model,
+            @ModelAttribute("newUser") @Valid User hoidanit,
+            BindingResult newUserBindingResult, @RequestParam("hoidanitFile") MultipartFile file) {
+        List<FieldError> errors = newUserBindingResult.getFieldErrors();
+        for (FieldError error : errors) {
+            System.out.println(error.getObjectName() + " - " + error.getDefaultMessage());
+        }
+
+        // validate
+        if (newUserBindingResult.hasErrors()) {
+            return "/admin/user/create";
+
+        }
+
+        //
+        String avatar = this.uploadService.handleSaveUploadFile(file, "avatar");
+        String hashPassword = this.passwordEncoder.encode(hoidanit.getPassword());
+        hoidanit.setAvatar(avatar);
+        hoidanit.setPassword(hashPassword);
+        hoidanit.setRole(this.userService.getRoleByName(hoidanit.getRole().getName()));
         this.userService.handleSaveUser(hoidanit);
         return "redirect:/admin/user";
     }

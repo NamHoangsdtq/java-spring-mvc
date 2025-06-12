@@ -21,10 +21,10 @@
                 <div id="layoutSidenav_content">
                     <main>
                         <div class="container-fluid px-4">
-                            <h1 class="mt-4">Manage Product</h1>
+                            <h1 class="mt-4">Manage User</h1>
                             <ol class="breadcrumb mb-4">
                                 <li class="breadcrumb-item active"><a href="/admin">Dashboard</a></li>
-                                <li class="breadcrumb-item active">Products</li>
+                                <li class="breadcrumb-item active">Users</li>
                             </ol>
                             <div class="mt-5">
                                 <div class="row">
@@ -41,6 +41,7 @@
                                                     <th scope="col">ID</th>
                                                     <th scope="col">Email</th>
                                                     <th scope="col">Full Name</th>
+                                                    <th scope="col">Role</th>
                                                     <th scope="col">Action</th>
                                                 </tr>
                                             </thead>
@@ -50,6 +51,7 @@
                                                         <th>${user.id}</th>
                                                         <th>${user.email}</th>
                                                         <th>${user.fullName}</th>
+                                                        <th>${user.role.name}</th>
                                                         <td>
                                                             <a href="/admin/user/${user.id}"
                                                                 class="btn btn-success">View</a>
