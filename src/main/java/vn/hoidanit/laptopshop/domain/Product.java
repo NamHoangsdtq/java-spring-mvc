@@ -15,6 +15,7 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @NotNull
     @NotEmpty(message = "Tên sản phẩm không được để trống")
 
     private String name;
